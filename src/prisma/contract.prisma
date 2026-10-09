@@ -1,0 +1,87 @@
+// use prisma-8
+
+
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  passwordHash  String
+  createdAt     temporal.createdAt()
+  updatedAt     temporal.updatedAt()
+
+  spaces        Space[]
+  subscription  Subscription?
+}
+
+model Space {
+  id                 String    @id @default(uuid())
+  ownerId            String
+  title              String
+  subtitle           String?
+  slug               String    @unique
+  theme              String    @default("default")
+  ratingEnabled      Boolean   @default(true)
+  fieldConfiguration Json
+  createdAt          temporal.createdAt()
+  updatedAt          temporal.updatedAt()
+
+  owner              User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  testimonials       Testimonial[]
+  widgetConfig       WidgetConfiguration?
+}
+
+model Testimonial {
+  id               String    @id @default(uuid())
+  spaceId          String
+  customerName     String
+  email            String
+  companyName      String?
+  jobTitle         String?
+  socialProfileUrl String?
+  profilePhotoUrl  String?
+  testimonialText  String
+  rating           Int?
+  sharingConsent   Boolean   @default(false)
+  featured         Boolean   @default(false)
+  favorite         Boolean   @default(false)
+  hidden           Boolean   @default(false)
+  deletedAt        DateTime?
+  createdAt        temporal.createdAt()
+
+  space            Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id                   String    @id @default(uuid())
+  userId               String    @unique
+  plan                 String    @default("free")
+  status               String    @default("active")
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+  currentPeriodEnd     DateTime?
+  createdAt            temporal.createdAt()
+  updatedAt            temporal.updatedAt()
+
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model WidgetConfiguration {
+  id              String    @id @default(uuid())
+  spaceId         String    @unique
+  layout          String    @default("masonry")
+  themeMode       String    @default("light")
+  backgroundColor String?
+  animation       String    @default("none")
+  createdAt       temporal.createdAt()
+  updatedAt       temporal.updatedAt()
+
+  space           Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+}
+
+model WebhookEvent {
+  id            String    @id @default(uuid())
+  stripeEventId String    @unique
+  eventType     String
+  processedAt   DateTime  @default(now())
+  createdAt     temporal.createdAt()
+}

@@ -1,0 +1,793 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.Space",
+    "label": "Create table \"Space\"",
+    "summary": "Creates table \"Space\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Space"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Space\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Space\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Space\"",
+        "sql": "CREATE TABLE \"public\".\"Space\" (\n  \"createdAt\" timestamptz NOT NULL,\n  \"fieldConfiguration\" json NOT NULL,\n  \"id\" text NOT NULL,\n  \"ownerId\" text NOT NULL,\n  \"ratingEnabled\" bool DEFAULT true NOT NULL,\n  \"slug\" text NOT NULL,\n  \"subtitle\" text,\n  \"theme\" text DEFAULT 'default' NOT NULL,\n  \"title\" text NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Space\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Space\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.Subscription",
+    "label": "Create table \"Subscription\"",
+    "summary": "Creates table \"Subscription\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Subscription"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Subscription\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Subscription\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Subscription\"",
+        "sql": "CREATE TABLE \"public\".\"Subscription\" (\n  \"createdAt\" timestamptz NOT NULL,\n  \"currentPeriodEnd\" timestamptz,\n  \"id\" text NOT NULL,\n  \"plan\" text DEFAULT 'free' NOT NULL,\n  \"status\" text DEFAULT 'active' NOT NULL,\n  \"stripeCustomerId\" text,\n  \"stripeSubscriptionId\" text,\n  \"updatedAt\" timestamptz NOT NULL,\n  \"userId\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Subscription\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Subscription\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.Testimonial",
+    "label": "Create table \"Testimonial\"",
+    "summary": "Creates table \"Testimonial\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Testimonial"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Testimonial\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Testimonial\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Testimonial\"",
+        "sql": "CREATE TABLE \"public\".\"Testimonial\" (\n  \"companyName\" text,\n  \"createdAt\" timestamptz NOT NULL,\n  \"customerName\" text NOT NULL,\n  \"deletedAt\" timestamptz,\n  \"email\" text NOT NULL,\n  \"favorite\" bool DEFAULT false NOT NULL,\n  \"featured\" bool DEFAULT false NOT NULL,\n  \"hidden\" bool DEFAULT false NOT NULL,\n  \"id\" text NOT NULL,\n  \"jobTitle\" text,\n  \"profilePhotoUrl\" text,\n  \"rating\" int4,\n  \"sharingConsent\" bool DEFAULT false NOT NULL,\n  \"socialProfileUrl\" text,\n  \"spaceId\" text NOT NULL,\n  \"testimonialText\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Testimonial\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Testimonial\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.User",
+    "label": "Create table \"User\"",
+    "summary": "Creates table \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"User\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"User\"",
+        "sql": "CREATE TABLE \"public\".\"User\" (\n  \"createdAt\" timestamptz NOT NULL,\n  \"email\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"name\" text NOT NULL,\n  \"passwordHash\" text NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"User\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.WebhookEvent",
+    "label": "Create table \"WebhookEvent\"",
+    "summary": "Creates table \"WebhookEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "WebhookEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"WebhookEvent\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"WebhookEvent\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"WebhookEvent\"",
+        "sql": "CREATE TABLE \"public\".\"WebhookEvent\" (\n  \"createdAt\" timestamptz NOT NULL,\n  \"eventType\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"processedAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"stripeEventId\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"WebhookEvent\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"WebhookEvent\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.WidgetConfiguration",
+    "label": "Create table \"WidgetConfiguration\"",
+    "summary": "Creates table \"WidgetConfiguration\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "WidgetConfiguration"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"WidgetConfiguration\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"WidgetConfiguration\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"WidgetConfiguration\"",
+        "sql": "CREATE TABLE \"public\".\"WidgetConfiguration\" (\n  \"animation\" text DEFAULT 'none' NOT NULL,\n  \"backgroundColor\" text,\n  \"createdAt\" timestamptz NOT NULL,\n  \"id\" text NOT NULL,\n  \"layout\" text DEFAULT 'masonry' NOT NULL,\n  \"spaceId\" text NOT NULL,\n  \"themeMode\" text DEFAULT 'light' NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"WidgetConfiguration\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"WidgetConfiguration\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Space.Space_slug_key",
+    "label": "Add unique constraint on \"Space\" (slug)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Space_slug_key",
+        "table": "Space"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Space_slug_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Space_slug_key",
+          "public",
+          "\"public\".\"Space\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Space_slug_key\"",
+        "sql": "ALTER TABLE \"public\".\"Space\" ADD CONSTRAINT \"Space_slug_key\" UNIQUE (\"slug\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Space_slug_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Space_slug_key",
+          "public",
+          "\"public\".\"Space\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Subscription.Subscription_userId_key",
+    "label": "Add unique constraint on \"Subscription\" (userId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Subscription_userId_key",
+        "table": "Subscription"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Subscription_userId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Subscription_userId_key",
+          "public",
+          "\"public\".\"Subscription\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Subscription_userId_key\"",
+        "sql": "ALTER TABLE \"public\".\"Subscription\" ADD CONSTRAINT \"Subscription_userId_key\" UNIQUE (\"userId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Subscription_userId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Subscription_userId_key",
+          "public",
+          "\"public\".\"Subscription\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Subscription.Subscription_stripeCustomerId_key",
+    "label": "Add unique constraint on \"Subscription\" (stripeCustomerId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Subscription_stripeCustomerId_key",
+        "table": "Subscription"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Subscription_stripeCustomerId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Subscription_stripeCustomerId_key",
+          "public",
+          "\"public\".\"Subscription\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Subscription_stripeCustomerId_key\"",
+        "sql": "ALTER TABLE \"public\".\"Subscription\" ADD CONSTRAINT \"Subscription_stripeCustomerId_key\" UNIQUE (\"stripeCustomerId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Subscription_stripeCustomerId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Subscription_stripeCustomerId_key",
+          "public",
+          "\"public\".\"Subscription\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Subscription.Subscription_stripeSubscriptionId_key",
+    "label": "Add unique constraint on \"Subscription\" (stripeSubscriptionId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Subscription_stripeSubscriptionId_key",
+        "table": "Subscription"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Subscription_stripeSubscriptionId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Subscription_stripeSubscriptionId_key",
+          "public",
+          "\"public\".\"Subscription\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Subscription_stripeSubscriptionId_key\"",
+        "sql": "ALTER TABLE \"public\".\"Subscription\" ADD CONSTRAINT \"Subscription_stripeSubscriptionId_key\" UNIQUE (\"stripeSubscriptionId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Subscription_stripeSubscriptionId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Subscription_stripeSubscriptionId_key",
+          "public",
+          "\"public\".\"Subscription\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.User.User_email_key",
+    "label": "Add unique constraint on \"User\" (email)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "User_email_key",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"User_email_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "User_email_key",
+          "public",
+          "\"public\".\"User\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"User_email_key\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ADD CONSTRAINT \"User_email_key\" UNIQUE (\"email\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"User_email_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "User_email_key",
+          "public",
+          "\"public\".\"User\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.WebhookEvent.WebhookEvent_stripeEventId_key",
+    "label": "Add unique constraint on \"WebhookEvent\" (stripeEventId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "WebhookEvent_stripeEventId_key",
+        "table": "WebhookEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"WebhookEvent_stripeEventId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "WebhookEvent_stripeEventId_key",
+          "public",
+          "\"public\".\"WebhookEvent\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"WebhookEvent_stripeEventId_key\"",
+        "sql": "ALTER TABLE \"public\".\"WebhookEvent\" ADD CONSTRAINT \"WebhookEvent_stripeEventId_key\" UNIQUE (\"stripeEventId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"WebhookEvent_stripeEventId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "WebhookEvent_stripeEventId_key",
+          "public",
+          "\"public\".\"WebhookEvent\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.WidgetConfiguration.WidgetConfiguration_spaceId_key",
+    "label": "Add unique constraint on \"WidgetConfiguration\" (spaceId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "WidgetConfiguration_spaceId_key",
+        "table": "WidgetConfiguration"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"WidgetConfiguration_spaceId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "WidgetConfiguration_spaceId_key",
+          "public",
+          "\"public\".\"WidgetConfiguration\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"WidgetConfiguration_spaceId_key\"",
+        "sql": "ALTER TABLE \"public\".\"WidgetConfiguration\" ADD CONSTRAINT \"WidgetConfiguration_spaceId_key\" UNIQUE (\"spaceId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"WidgetConfiguration_spaceId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "WidgetConfiguration_spaceId_key",
+          "public",
+          "\"public\".\"WidgetConfiguration\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Space.Space_ownerId_idx_e2d0c1ef",
+    "label": "Create index \"Space_ownerId_idx_e2d0c1ef\" on \"Space\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Space_ownerId_idx_e2d0c1ef",
+        "table": "Space"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Space_ownerId_idx_e2d0c1ef\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Space_ownerId_idx_e2d0c1ef\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Space_ownerId_idx_e2d0c1ef\"",
+        "sql": "CREATE INDEX \"Space_ownerId_idx_e2d0c1ef\" ON \"public\".\"Space\" (\"ownerId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Space_ownerId_idx_e2d0c1ef\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Space_ownerId_idx_e2d0c1ef\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Testimonial.Testimonial_spaceId_idx_bb21015f",
+    "label": "Create index \"Testimonial_spaceId_idx_bb21015f\" on \"Testimonial\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Testimonial_spaceId_idx_bb21015f",
+        "table": "Testimonial"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Testimonial_spaceId_idx_bb21015f\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Testimonial_spaceId_idx_bb21015f\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Testimonial_spaceId_idx_bb21015f\"",
+        "sql": "CREATE INDEX \"Testimonial_spaceId_idx_bb21015f\" ON \"public\".\"Testimonial\" (\"spaceId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Testimonial_spaceId_idx_bb21015f\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Testimonial_spaceId_idx_bb21015f\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Space.Space_ownerId_fkey",
+    "label": "Add foreign key \"Space_ownerId_fkey\" on \"Space\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Space_ownerId_fkey",
+        "table": "Space"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Space_ownerId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Space_ownerId_fkey",
+          "public",
+          "\"public\".\"Space\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Space_ownerId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Space\"\nADD CONSTRAINT \"Space_ownerId_fkey\"\nFOREIGN KEY (\"ownerId\")\nREFERENCES \"public\".\"User\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Space_ownerId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Space_ownerId_fkey",
+          "public",
+          "\"public\".\"Space\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Subscription.Subscription_userId_fkey",
+    "label": "Add foreign key \"Subscription_userId_fkey\" on \"Subscription\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Subscription_userId_fkey",
+        "table": "Subscription"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Subscription_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Subscription_userId_fkey",
+          "public",
+          "\"public\".\"Subscription\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Subscription_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Subscription\"\nADD CONSTRAINT \"Subscription_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"User\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Subscription_userId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Subscription_userId_fkey",
+          "public",
+          "\"public\".\"Subscription\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Testimonial.Testimonial_spaceId_fkey",
+    "label": "Add foreign key \"Testimonial_spaceId_fkey\" on \"Testimonial\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Testimonial_spaceId_fkey",
+        "table": "Testimonial"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Testimonial_spaceId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Testimonial_spaceId_fkey",
+          "public",
+          "\"public\".\"Testimonial\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Testimonial_spaceId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Testimonial\"\nADD CONSTRAINT \"Testimonial_spaceId_fkey\"\nFOREIGN KEY (\"spaceId\")\nREFERENCES \"public\".\"Space\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Testimonial_spaceId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Testimonial_spaceId_fkey",
+          "public",
+          "\"public\".\"Testimonial\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.WidgetConfiguration.WidgetConfiguration_spaceId_fkey",
+    "label": "Add foreign key \"WidgetConfiguration_spaceId_fkey\" on \"WidgetConfiguration\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "WidgetConfiguration_spaceId_fkey",
+        "table": "WidgetConfiguration"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"WidgetConfiguration_spaceId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "WidgetConfiguration_spaceId_fkey",
+          "public",
+          "\"public\".\"WidgetConfiguration\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"WidgetConfiguration_spaceId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"WidgetConfiguration\"\nADD CONSTRAINT \"WidgetConfiguration_spaceId_fkey\"\nFOREIGN KEY (\"spaceId\")\nREFERENCES \"public\".\"Space\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"WidgetConfiguration_spaceId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "WidgetConfiguration_spaceId_fkey",
+          "public",
+          "\"public\".\"WidgetConfiguration\""
+        ]
+      }
+    ]
+  }
+]
