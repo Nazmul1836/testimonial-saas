@@ -45,6 +45,9 @@ export async function PUT(req: Request) {
 
     // Update user in DB
     const updatedUser = await db.orm.public.User.where({ id: session.userId }).update(updateData);
+    if (!updatedUser) {
+      return errorResponse('User not found', 404);
+    }
 
     return successResponse({
       id: updatedUser.id,

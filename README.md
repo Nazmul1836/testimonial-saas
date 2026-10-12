@@ -86,7 +86,7 @@ Open [http://localhost:3000](http://localhost:3000), register an account, and cr
 stripe listen --forward-to localhost:3000/api/webhooks/stripe
 ```
 
-Copy the `whsec_...` it prints into `STRIPE_WEBHOOK_SECRET`. Note that the webhook handler is still a stub (see below).
+Copy the `whsec_...` it prints into `STRIPE_WEBHOOK_SECRET`. Upgrades work locally without this (the checkout return is verified with Stripe's API), but cancellations and payment failures only arrive via the webhook.
 
 ### Other commands
 
@@ -114,21 +114,19 @@ Status is measured against the PRD's functional requirements (FR-01 – FR-11).
 | **FR-07 Public display** | 🟡 | Hidden and deleted testimonials are excluded; featured shown first; emails never shown. **Sharing consent is not respected** — testimonials without consent still appear in the widget. The public Space page shows only the form, not testimonials. |
 | **FR-08 Widget builder** | ✅ | Masonry, Carousel, and Grid layouts; light/dark mode; background color; live preview (refreshes after save); embed code via `public/widget.js` with a copy button. The `animation` field exists in the DB but has no UI or effect yet. |
 | **FR-09 Plan limits** | 🟡 | Space limits enforced. The testimonial limit (100 / 1,000) is counted **per account** instead of **per space** as the PRD specifies. |
-| **FR-10 Billing & Stripe** | 🟡 | "Upgrade to Pro" creates a Stripe Checkout session and redirects. **The webhook handler is a stub** — it does not verify signatures or update the `Subscription` table, so a user never actually becomes Pro. The Billing card always shows "Free Plan"; no cancellation flow. |
-| **FR-11 Security** | 🟡 | Auth + ownership checks, server-side limits, hashed passwords, secrets in env vars. **Missing:** schema-based input validation, rate limiting, webhook signature verification and idempotency (`WebhookEvent` table is unused). `JWT_SECRET` falls back to a hard-coded default if unset. |
+| **FR-10 Billing & Stripe** | ✅ | Stripe Checkout upgrade; after redirect, `/api/stripe/confirm` verifies the session with Stripe's API before activating Pro. Verified webhook (`/api/webhooks/stripe`) syncs `checkout.session.completed` and `customer.subscription.*` (active, past_due, canceled). Billing card shows real plan, status, and renewal date; Pro users manage/cancel via the Stripe Customer Portal. |
+| **FR-11 Security** | 🟡 | Auth + ownership checks, server-side limits, hashed passwords, secrets in env vars, webhook signature verification and duplicate-event handling via `WebhookEvent`. **Missing:** schema-based input validation, rate limiting. `JWT_SECRET` falls back to a hard-coded default if unset. |
 | **Account settings** | ✅ | Change name and password (current password required). |
 | **Automated tests** | ❌ | No Playwright or unit tests yet (PRD acceptance criterion #12). |
 | **CI pipeline** | ❌ | No CI config yet. |
 
 ### Suggested next steps
 
-1. Implement the Stripe webhook: verify the signature, record events in `WebhookEvent`, and upsert `Subscription` on `checkout.session.completed` / `customer.subscription.*`.
-2. Show the real plan and status on the Billing card in Settings (the dashboard banner already reads it).
-3. Filter public widgets by `sharingConsent`.
-4. Make the testimonial limit per-space and validate all configured required fields on the server.
-5. Add rate limiting to `POST /api/spaces/[id]/testimonials`.
-6. Add Playwright tests for the acceptance criteria.
-7. Expand themes to 25 and add the inbox filters and widget animations.
+1. Filter public widgets by `sharingConsent`.
+2. Make the testimonial limit per-space and validate all configured required fields on the server.
+3. Add rate limiting to `POST /api/spaces/[id]/testimonials`.
+4. Add Playwright tests for the acceptance criteria.
+5. Expand themes to 25 and add the inbox filters and widget animations.
 
 ## Agentic tools used
 

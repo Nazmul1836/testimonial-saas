@@ -22,12 +22,16 @@ export async function POST() {
   const subscription = await db.orm.public.Subscription.where({ userId: session.userId }).first();
   const user = await db.orm.public.User.where({ id: session.userId }).first();
 
+  // Prevent a second paid subscription
+  if (subscription?.plan === 'pro') {
+    return NextResponse.json({ error: 'You are already on the Pro plan' }, { status: 400 });
+  }
+
   try {
     let customerId = subscription?.stripeCustomerId;
 
     // Create a new checkout session
     const stripeSession = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
       mode: 'subscription',
       customer: customerId || undefined,
       customer_email: customerId ? undefined : user?.email, // Only send email if no customer ID exists
@@ -38,8 +42,9 @@ export async function POST() {
         },
       ],
       client_reference_id: session.userId, // Very important for linking webhook
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?checkout=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?checkout=cancelled`,
+      // Confirmed server-side against Stripe before Pro is activated
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/stripe/confirm?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?checkout=cancelled`,
     });
 
     return NextResponse.json({ url: stripeSession.url });

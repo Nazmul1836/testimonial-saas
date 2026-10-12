@@ -75,7 +75,7 @@ export default function DashboardChart({ rawData }: { rawData: { date: string, c
               />
               <Tooltip 
                 contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                labelFormatter={(val) => new Date(val).toLocaleDateString()}
+                labelFormatter={(val) => new Date(String(val)).toLocaleDateString()}
               />
               <Area type="monotone" dataKey="count" stroke="#4f46e5" strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" />
             </AreaChart>

@@ -77,7 +77,7 @@ export default function InboxClient({ spaceId, initialData, initialMeta }: { spa
     
     // Optimistic update
     setTestimonials(prev => prev.filter(t => t.id !== id));
-    setMeta(prev => ({ ...prev, total: prev.total - 1 }));
+    setMeta((prev: typeof meta) => ({ ...prev, total: prev.total - 1 }));
 
     try {
       await fetch(`/api/spaces/${spaceId}/testimonials/${id}`, { method: 'DELETE' });

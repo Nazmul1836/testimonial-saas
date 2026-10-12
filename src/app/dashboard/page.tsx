@@ -78,9 +78,9 @@ export default async function DashboardPage() {
         <div className="bg-gradient-to-r from-primary/10 to-indigo-500/10 border border-primary/20 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <h3 className="font-bold text-lg text-primary-700 dark:text-primary-400">You are on the Free Plan</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Upgrade to Pro to collect unlimited testimonials and create unlimited spaces.</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Upgrade to Pro for up to 25 spaces and 1,000 testimonials per space.</p>
           </div>
-          <Link href="/dashboard/settings" className="px-6 py-2 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover transition-colors whitespace-nowrap shadow-sm hover:shadow-md">
+          <Link href="/dashboard/settings#billing" className="px-6 py-2 bg-primary text-white font-bold rounded-xl hover:bg-primary-hover transition-colors whitespace-nowrap shadow-sm hover:shadow-md">
             Upgrade to Pro
           </Link>
         </div>

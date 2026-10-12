@@ -44,14 +44,11 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       animation: body.animation || 'none'
     });
   } else {
-    config = await db.orm.public.WidgetConfiguration.update({
-      where: { id: config.id },
-      data: {
-        layout: body.layout,
-        themeMode: body.themeMode,
-        backgroundColor: body.backgroundColor,
-        animation: body.animation
-      }
+    config = await db.orm.public.WidgetConfiguration.where({ id: config.id }).update({
+      layout: body.layout,
+      themeMode: body.themeMode,
+      backgroundColor: body.backgroundColor,
+      animation: body.animation
     });
   }
 

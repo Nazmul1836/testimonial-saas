@@ -34,9 +34,12 @@ export default async function WidgetBuilderPage({ params }: { params: Promise<{ 
       </div>
 
       <WidgetBuilderClient spaceId={id} initialConfig={{
-        ...config,
-        createdAt: config.createdAt.toString(),
-        updatedAt: config.updatedAt.toString()
+        id: config.id,
+        spaceId: config.spaceId,
+        layout: config.layout,
+        themeMode: config.themeMode,
+        backgroundColor: config.backgroundColor,
+        animation: config.animation,
       }} />
     </div>
   );

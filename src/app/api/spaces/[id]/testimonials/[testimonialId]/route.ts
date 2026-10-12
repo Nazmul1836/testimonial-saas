@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { Temporal } from 'temporal-polyfill';
 import { getSession } from '@/lib/auth';
 import { db } from '@/prisma/db';
 import { successResponse, errorResponse, handleApiError } from '@/lib/api-response';
@@ -56,9 +57,9 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       return errorResponse('Testimonial not found', 404);
     }
 
-    // Soft delete
+    // Soft delete (timestamp columns are stored as Temporal.Instant, not Date)
     const updated = await db.orm.public.Testimonial.where({ id: testimonialId }).update({
-      deletedAt: new Date(),
+      deletedAt: Temporal.Now.instant(),
     });
 
     return successResponse(updated);
