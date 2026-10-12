@@ -1,6 +1,7 @@
 import { getSession } from '@/lib/auth';
 import { db } from '@/prisma/db';
 import Link from 'next/link';
+import { Temporal } from 'temporal-polyfill';
 import DashboardChart from './DashboardChart';
 
 export const instant = false;
@@ -10,35 +11,35 @@ export default async function DashboardPage() {
   
   if (!session) return null;
 
-  const user = await db.orm.public.User.where({ id: session.userId }).first();
-  const subscription = await db.orm.public.Subscription.where({ userId: session.userId }).first();
+  // Independent queries run in parallel: each one is a round trip to the database
+  const [user, subscription, userSpaces] = await Promise.all([
+    db.orm.public.User.where({ id: session.userId }).first(),
+    db.orm.public.Subscription.where({ userId: session.userId }).first(),
+    // Since we don't have a direct relation between User -> Testimonials, we find the user's spaces first.
+    db.orm.public.Space.select('id', 'title').where({ ownerId: session.userId }).all(),
+  ]);
   const isFreePlan = !subscription || subscription.plan === 'free';
-
-  // Total Spaces Count
-  const spacesResult = await db.orm.public.Space.where({ ownerId: session.userId }).aggregate((a) => ({ count: a.count() }));
-  const spacesCount = spacesResult.count;
-
-  // Since we don't have a direct relation between User -> Testimonials, we find the user's spaces first.
-  const userSpaces = await db.orm.public.Space.where({ ownerId: session.userId }).all();
+  const spacesCount = userSpaces.length;
   const spaceIds = userSpaces.map(s => s.id);
 
   let testimonialsCount = 0;
   let recentTestimonials: any[] = [];
   let chartData: { date: string, count: number }[] = [];
-  
+
   if (spaceIds.length > 0) {
     const testimonialsQuery = db.orm.public.Testimonial.where((t) => t.spaceId.in(spaceIds)).where((t) => t.deletedAt.isNull());
-    
-    const testimonialsResult = await testimonialsQuery.aggregate((a) => ({ count: a.count() }));
-    testimonialsCount = testimonialsResult.count;
+    // The chart covers at most the last 91 days, so only those rows are loaded
+    const chartStart = Temporal.Now.instant().subtract({ hours: 91 * 24 });
 
-    recentTestimonials = await testimonialsQuery
-      .orderBy((t) => t.createdAt.desc())
-      .limit(5)
-      .all();
+    const [testimonialsResult, recent, allTestimonials] = await Promise.all([
+      testimonialsQuery.aggregate((a) => ({ count: a.count() })),
+      testimonialsQuery.orderBy((t) => t.createdAt.desc()).limit(5).all(),
+      testimonialsQuery.where((t) => t.createdAt.gte(chartStart)).select('createdAt').all(),
+    ]);
+    testimonialsCount = testimonialsResult.count;
+    recentTestimonials = recent;
 
     // Aggregate for chart
-    const allTestimonials = await testimonialsQuery.orderBy((t) => t.createdAt.asc()).all();
     const dailyMap = allTestimonials.reduce((acc, t) => {
       const date = t.createdAt.toString().split('T')[0];
       if (!acc[date]) acc[date] = 0;

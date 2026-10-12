@@ -11,10 +11,14 @@ export default async function WidgetBuilderPage({ params }: { params: Promise<{ 
   if (!session) redirect('/login');
 
   const { id } = await params;
-  const space = await db.orm.public.Space.where({ id, ownerId: session.userId }).first();
+  // Both in parallel; the config is only used after the ownership check passes
+  const [space, existingConfig] = await Promise.all([
+    db.orm.public.Space.where({ id, ownerId: session.userId }).first(),
+    db.orm.public.WidgetConfiguration.where({ spaceId: id }).first(),
+  ]);
   if (!space) redirect('/dashboard/spaces');
 
-  let config = await db.orm.public.WidgetConfiguration.where({ spaceId: id }).first();
+  let config = existingConfig;
   if (!config) {
     config = await db.orm.public.WidgetConfiguration.create({
       spaceId: id,

@@ -41,8 +41,11 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
     redirect('/login');
   }
 
-  // Fetch current user
-  const user = await db.orm.public.User.first({ id: session.userId });
+  // Fetch current user and plan in parallel
+  const [user, subscription] = await Promise.all([
+    db.orm.public.User.first({ id: session.userId }),
+    db.orm.public.Subscription.first({ userId: session.userId }),
+  ]);
 
   if (!user) {
     redirect('/login');
@@ -51,7 +54,6 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
   const { checkout } = await searchParams;
   const checkoutMessage = checkout ? CHECKOUT_MESSAGES[checkout] : undefined;
 
-  const subscription = await db.orm.public.Subscription.first({ userId: session.userId });
   const isPro = subscription?.plan === 'pro';
   const renewalDate = subscription?.currentPeriodEnd
     ? new Date(subscription.currentPeriodEnd.epochMilliseconds).toLocaleDateString(undefined, { dateStyle: 'medium' })

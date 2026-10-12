@@ -19,13 +19,12 @@ export default async function SpaceInboxPage({ params }: { params: Promise<{ id:
   const limit = 20;
   let query = db.orm.public.Testimonial.where({ spaceId: id }).where((t) => t.deletedAt.isNull());
   
-  const totalResult = await query.aggregate((a) => ({ count: a.count() }));
+  // Count and first page in parallel: each query is a round trip to the database
+  const [totalResult, testimonials] = await Promise.all([
+    query.aggregate((a) => ({ count: a.count() })),
+    query.orderBy((t) => t.createdAt.desc()).limit(limit).all(),
+  ]);
   const total = totalResult.count;
-  
-  const testimonials = await query
-    .orderBy((t) => t.createdAt.desc())
-    .limit(limit)
-    .all();
 
   const meta = {
     total,
