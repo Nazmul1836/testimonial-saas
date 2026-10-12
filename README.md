@@ -1,36 +1,162 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Testimonial SaaS
 
-## Getting Started
+A multi-user SaaS for collecting, managing, and displaying customer testimonials. Owners create **Spaces** (collection campaigns), share a public link where customers submit testimonials without an account, curate submissions in an inbox, and embed a "Wall of Love" widget on any website. Free and Pro plans are billed through Stripe.
 
-First, run the development server:
+The full specification lives in [PRD/testimonial_saas_prd.md](PRD/testimonial_saas_prd.md), and the sprint plan in [wbs_and_development_plan.md](wbs_and_development_plan.md).
+
+## Tech stack
+
+| Area | Choice |
+|------|--------|
+| Framework | Next.js 16.4 (App Router), React 19.3, TypeScript |
+| Styling | Tailwind CSS v4 |
+| Database | PostgreSQL (Neon or local) via **Prisma 8** (`@prisma/orm-postgres`) |
+| Auth | Custom JWT session cookie (`jose` + `bcryptjs`), enforced in `src/middleware.ts` |
+| Payments | Stripe Checkout + webhooks (test mode) |
+| Uploads | Vercel Blob, with a local `public/uploads/` fallback in development |
+| Charts | Recharts |
+
+## How to run the project
+
+### Prerequisites
+
+- Node.js 20+
+- A PostgreSQL database (a free [Neon](https://neon.tech) project works, or local Postgres)
+- A Stripe account in **test mode** (only needed for the upgrade flow)
+
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+`postinstall` runs `prisma skills sync`, which copies the Prisma 8 agent skills into `.claude/`, `.cursor/`, `.agents/`, and `.devin/` (see [Agentic tools](#agentic-tools-used)).
+
+### 2. Configure environment variables
+
+Create a `.env` file in the project root (it is git-ignored):
+
+```env
+# Database (Neon or local PostgreSQL)
+DATABASE_URL="postgresql://user:password@localhost:5432/testimonial_saas"
+
+# Auth — secret used to sign session JWTs (use a long random string)
+JWT_SECRET="generate_a_strong_random_secret_here"
+
+# App
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
+# Stripe (test mode)
+STRIPE_SECRET_KEY="sk_test_..."
+STRIPE_PRO_PRICE_ID="price_..."        # recurring price for the Pro plan
+STRIPE_WEBHOOK_SECRET="whsec_..."
+
+# Optional — Vercel Blob for profile photo uploads.
+# If unset, uploads are written to public/uploads/ (development only).
+BLOB_READ_WRITE_TOKEN=""
+```
+
+### 3. Create the database schema
+
+The schema is defined in [src/prisma/contract.prisma](src/prisma/contract.prisma) and the initial migration is in [migrations/app/](migrations/app/). `prisma.config.ts` reads `DATABASE_URL` from `.env`, so you can apply it with:
+
+```bash
+npx prisma db migrate
+```
+
+After changing `contract.prisma`, re-emit the contract and plan a new migration:
+
+```bash
+npx prisma contract emit
+npx prisma migration plan --name <change_name>
+npx prisma db migrate
+```
+
+### 4. Start the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000), register an account, and create your first Space.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 5. (Optional) Forward Stripe webhooks locally
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+stripe listen --forward-to localhost:3000/api/webhooks/stripe
+```
 
-## Learn More
+Copy the `whsec_...` it prints into `STRIPE_WEBHOOK_SECRET`. Note that the webhook handler is still a stub (see below).
 
-To learn more about Next.js, take a look at the following resources:
+### Other commands
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Command | Purpose |
+|---------|---------|
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build |
+| `npm run lint` | ESLint |
+| `GET /api/health` | Health check endpoint |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Feature status
 
-## Deploy on Vercel
+Status is measured against the PRD's functional requirements (FR-01 – FR-11).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+✅ Done · 🟡 Partial · ❌ Not started
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Area | Status | Notes |
+|------|:------:|-------|
+| **FR-01 Authentication** | ✅ | Register, login, logout; bcrypt-hashed passwords; JWT cookie; middleware protects `/dashboard`; ownership checks on all private API routes. |
+| **FR-02 Dashboard** | ✅ | Totals for spaces / testimonials / featured, recent activity, daily chart with 7/30/90-day ranges, Free-plan upgrade banner. |
+| **FR-03 Space management** | ✅ | Create, view, edit, delete; unique slug with collision handling; space limit (3 Free / 25 Pro) enforced on the server. |
+| **FR-04 Form configuration** | 🟡 | Fields can be enabled/disabled and marked required; rating toggle works. **Only 7 themes** exist (`default`, `dark`, `light`, `glass`, `neon`, `brutal`, `corporate`) — the PRD asks for 25. |
+| **FR-05 Public submission** | 🟡 | `/space/[slug]` form with enabled fields, star rating, photo upload, and a consent checkbox. Server only validates name, email, and text — optional fields marked required are not checked server-side. No rate limiting on the public endpoint. |
+| **FR-06 Testimonial inbox** | 🟡 | List, text/name/email search, filters (all / favorite / featured / hidden), feature, favorite, hide, soft delete with confirmation, pagination. **Missing:** filters by space, rating, and date; overflow menu. |
+| **FR-07 Public display** | 🟡 | Hidden and deleted testimonials are excluded; featured shown first; emails never shown. **Sharing consent is not respected** — testimonials without consent still appear in the widget. The public Space page shows only the form, not testimonials. |
+| **FR-08 Widget builder** | ✅ | Masonry, Carousel, and Grid layouts; light/dark mode; background color; live preview (refreshes after save); embed code via `public/widget.js` with a copy button. The `animation` field exists in the DB but has no UI or effect yet. |
+| **FR-09 Plan limits** | 🟡 | Space limits enforced. The testimonial limit (100 / 1,000) is counted **per account** instead of **per space** as the PRD specifies. |
+| **FR-10 Billing & Stripe** | 🟡 | "Upgrade to Pro" creates a Stripe Checkout session and redirects. **The webhook handler is a stub** — it does not verify signatures or update the `Subscription` table, so a user never actually becomes Pro. The Billing card always shows "Free Plan"; no cancellation flow. |
+| **FR-11 Security** | 🟡 | Auth + ownership checks, server-side limits, hashed passwords, secrets in env vars. **Missing:** schema-based input validation, rate limiting, webhook signature verification and idempotency (`WebhookEvent` table is unused). `JWT_SECRET` falls back to a hard-coded default if unset. |
+| **Account settings** | ✅ | Change name and password (current password required). |
+| **Automated tests** | ❌ | No Playwright or unit tests yet (PRD acceptance criterion #12). |
+| **CI pipeline** | ❌ | No CI config yet. |
+
+### Suggested next steps
+
+1. Implement the Stripe webhook: verify the signature, record events in `WebhookEvent`, and upsert `Subscription` on `checkout.session.completed` / `customer.subscription.*`.
+2. Show the real plan and status on the Billing card in Settings (the dashboard banner already reads it).
+3. Filter public widgets by `sharingConsent`.
+4. Make the testimonial limit per-space and validate all configured required fields on the server.
+5. Add rate limiting to `POST /api/spaces/[id]/testimonials`.
+6. Add Playwright tests for the acceptance criteria.
+7. Expand themes to 25 and add the inbox filters and widget animations.
+
+## Agentic tools used
+
+| Tool | Type | Where / how it was used |
+|------|------|-------------------------|
+| **Google Antigravity** (Gemini 3.1) | AI coding agent / IDE | Main development agent. Turned the PRD into the WBS & sprint plan ([wbs_and_development_plan.md](wbs_and_development_plan.md)) and implemented the app — data model, API routes, dashboard, inbox, widget builder, Stripe checkout, and UI (commit `04f5000`). |
+| **Prisma 8 agent skills** (`prisma-8`, `prisma-composer-core-concepts`, `prisma-platform-core-concepts`) | Skills | Installed by `prisma skills sync` (the `postinstall` script) and configured in [prisma.config.ts](prisma.config.ts) (`skills.agents`). Synced into [.agents/skills/](.agents/skills/), [.claude/skills/](.claude/skills/), [.cursor/skills/](.cursor/skills/), and [.devin/skills/](.devin/skills/) so any agent knows Prisma 8's contract, migration, and query APIs (which differ from Prisma ≤7). |
+| **[AGENTS.md](AGENTS.md)** | Agent instructions file | Generated by `next dev`. Tells agents that Next.js 16 differs from their training data and to read `node_modules/next/dist/docs/` before writing code. |
+| **Project instructions in the PRD** | Agent rules | The "Project Instructions" section at the end of the [PRD](PRD/testimonial_saas_prd.md) sets the agent's workflow: plan → implement → verify, one feature at a time, server-side validation, no secrets committed, ask before destructive DB operations. |
+| **Claude Code** (Claude Opus 5.5, VS Code extension) | AI coding agent | Audited the codebase against the PRD and wrote this README. |
+
+**Not used:** no hooks, no MCP servers, and no subagents are configured in this project.
+
+## Project structure
+
+```
+src/
+├── app/
+│   ├── api/                  # REST routes: auth, spaces, testimonials, widget, upload, stripe, webhooks
+│   ├── dashboard/            # Authenticated app: stats, spaces, inbox, widget builder, settings
+│   ├── space/[slug]/         # Public testimonial collection form
+│   ├── w/[spaceId]/          # Public widget page (loaded in an iframe by widget.js)
+│   ├── login/, register/     # Auth pages
+│   └── page.tsx              # Landing page
+├── lib/                      # auth (JWT), stripe client, API response helpers, slugify
+├── prisma/                   # contract.prisma (schema), generated contract, db client
+└── middleware.ts             # Route protection
+public/widget.js              # Embeddable script that injects the widget iframe
+migrations/                   # Prisma 8 migrations
+PRD/                          # Product requirements
+```
