@@ -1,10 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'fallback_secret_please_change_in_production'
-);
+import { getJwtSecret } from './jwt-secret';
 
 const COOKIE_NAME = 'testimonial_session';
 
@@ -19,13 +16,13 @@ export async function signToken(payload: SessionPayload): Promise<string> {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d') // 7 days
-    .sign(JWT_SECRET);
+    .sign(getJwtSecret());
 }
 
 // Verify the JWT
 export async function verifyToken(token: string): Promise<SessionPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, getJwtSecret());
     return payload as SessionPayload;
   } catch (error) {
     return null;

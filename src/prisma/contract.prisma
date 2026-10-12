@@ -85,3 +85,13 @@ model WebhookEvent {
   processedAt   DateTime  @default(now())
   createdAt     temporal.createdAt()
 }
+
+// One row per rate-limited action (e.g. a public testimonial submission).
+// Rows older than the window are pruned when the same key is checked again.
+model RateLimitHit {
+  id        String    @id @default(uuid())
+  key       String
+  createdAt temporal.createdAt()
+
+  @@index([key, createdAt])
+}

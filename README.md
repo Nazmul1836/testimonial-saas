@@ -40,7 +40,8 @@ Create a `.env` file in the project root (it is git-ignored):
 # Database (Neon or local PostgreSQL)
 DATABASE_URL="postgresql://user:password@localhost:5432/testimonial_saas"
 
-# Auth — secret used to sign session JWTs (use a long random string)
+# Auth — secret used to sign session JWTs. Required in production (32+ chars),
+# e.g. `openssl rand -base64 48`. Development falls back to an insecure dev secret.
 JWT_SECRET="generate_a_strong_random_secret_here"
 
 # App
@@ -109,21 +110,21 @@ Status is measured against the PRD's functional requirements (FR-01 – FR-11).
 | **FR-02 Dashboard** | ✅ | Totals for spaces / testimonials / featured, recent activity, daily chart with 7/30/90-day ranges, Free-plan upgrade banner. |
 | **FR-03 Space management** | ✅ | Create, view, edit, delete; unique slug with collision handling; space limit (3 Free / 25 Pro) enforced on the server. |
 | **FR-04 Form configuration** | 🟡 | Fields can be enabled/disabled and marked required; rating toggle works. **Only 7 themes** exist (`default`, `dark`, `light`, `glass`, `neon`, `brutal`, `corporate`) — the PRD asks for 25. |
-| **FR-05 Public submission** | 🟡 | `/space/[slug]` form with enabled fields, star rating, photo upload, and an optional consent checkbox. Server only validates name, email, and text — optional fields marked required are not checked server-side. No rate limiting on the public endpoint. |
+| **FR-05 Public submission** | ✅ | `/space/[slug]` form with enabled fields, star rating, photo upload, and an optional consent checkbox. The server validates every field against the space's configuration (required fields, lengths, email/URL format, rating 1–5) and drops disabled fields. Submissions are limited to 5 per 10 minutes per visitor. |
 | **FR-06 Testimonial inbox** | 🟡 | List, text/name/email search, filters (all / favorite / featured / hidden), feature, favorite, hide, soft delete with confirmation, pagination. **Missing:** filters by space, rating, and date; overflow menu. |
 | **FR-07 Public display** | 🟡 | Widget shows only testimonials with sharing consent; hidden and deleted are excluded; featured shown first; emails never shown. The inbox marks private (no-consent) testimonials. **Missing:** the public Space page shows only the form, not testimonials. |
 | **FR-08 Widget builder** | ✅ | Masonry, Carousel, and Grid layouts; light/dark mode; background color; live preview (refreshes after save); embed code via `public/widget.js` with a copy button. The `animation` field exists in the DB but has no UI or effect yet. |
 | **FR-09 Plan limits** | ✅ | Enforced on the server: 3 / 25 spaces per account and 100 / 1,000 testimonials per space (Free / Pro). Deleted testimonials don't count toward the limit. |
 | **FR-10 Billing & Stripe** | ✅ | Stripe Checkout upgrade; after redirect, `/api/stripe/confirm` verifies the session with Stripe's API before activating Pro. Verified webhook (`/api/webhooks/stripe`) syncs `checkout.session.completed` and `customer.subscription.*` (active, past_due, canceled). Billing card shows real plan, status, and renewal date; Pro users manage/cancel via the Stripe Customer Portal. |
-| **FR-11 Security** | 🟡 | Auth + ownership checks, server-side limits, hashed passwords, secrets in env vars, webhook signature verification and duplicate-event handling via `WebhookEvent`. **Missing:** schema-based input validation, rate limiting. `JWT_SECRET` falls back to a hard-coded default if unset. |
+| **FR-11 Security** | 🟡 | Auth + ownership checks, server-side plan limits, hashed passwords, webhook signature verification and duplicate-event handling, public-form validation, Postgres-backed rate limiting (hashed IPs) on submissions and uploads, image-only uploads (checked by file contents, max 5 MB), and a required `JWT_SECRET` in production. **Missing:** validation on the authenticated owner APIs (space and widget settings). |
 | **Account settings** | ✅ | Change name and password (current password required). |
 | **Automated tests** | ❌ | No Playwright or unit tests yet (PRD acceptance criterion #12). |
 | **CI pipeline** | ❌ | No CI config yet. |
 
 ### Suggested next steps
 
-1. Validate all configured required fields on the server and add rate limiting to `POST /api/spaces/[id]/testimonials`.
-2. Add Playwright tests for the acceptance criteria.
+1. Add Playwright tests for the acceptance criteria.
+2. Validate input on the owner APIs (space and widget settings).
 3. Add the inbox filters (space, rating, date) and overflow menu.
 4. Expand themes to 25 and add widget animations.
 

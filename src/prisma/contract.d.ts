@@ -18,9 +18,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'5f4d2a05229f43633d7bf63337058f1c7cf81afbd589d52f1839fcf1be0882fc'>;
+  StorageHashBase<'8727b8ad20f263595f92caea19596b879dd73ff279cbb7e30b69e9927957c52e'>;
 export type ExecutionHash =
-  ExecutionHashBase<'fbebe05170e019895611aa4df77d94cae126e8b329d8d4f71c4a09e527598c78'>;
+  ExecutionHashBase<'20b02744ae5aad1f748df8876fbb74e6e25c69f309537cacb09a2e3136257745'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -234,6 +234,11 @@ type DefaultLiteralValue<CodecId extends string, Encoded> = CodecId extends keyo
 
 export type FieldOutputTypes = {
   readonly public: {
+    readonly RateLimitHit: {
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly id: CodecTypes['pg/text@1']['output'];
+      readonly key: CodecTypes['pg/text@1']['output'];
+    };
     readonly Space: {
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly fieldConfiguration: CodecTypes['pg/json@1']['output'];
@@ -304,6 +309,11 @@ export type FieldOutputTypes = {
 };
 export type FieldInputTypes = {
   readonly public: {
+    readonly RateLimitHit: {
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly id: CodecTypes['pg/text@1']['input'];
+      readonly key: CodecTypes['pg/text@1']['input'];
+    };
     readonly Space: {
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly fieldConfiguration: CodecTypes['pg/json@1']['input'];
@@ -374,6 +384,11 @@ export type FieldInputTypes = {
 };
 export type StorageColumnTypes = {
   readonly public: {
+    readonly RateLimitHit: {
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly id: CodecTypes['pg/text@1']['output'];
+      readonly key: CodecTypes['pg/text@1']['output'];
+    };
     readonly Space: {
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly fieldConfiguration: CodecTypes['pg/json@1']['output'];
@@ -444,6 +459,11 @@ export type StorageColumnTypes = {
 };
 export type StorageColumnInputTypes = {
   readonly public: {
+    readonly RateLimitHit: {
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly id: CodecTypes['pg/text@1']['input'];
+      readonly key: CodecTypes['pg/text@1']['input'];
+    };
     readonly Space: {
       readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly fieldConfiguration: CodecTypes['pg/json@1']['input'];
@@ -514,6 +534,12 @@ export type StorageColumnInputTypes = {
 };
 
 export namespace Models {
+  export type public_RateLimitHit = {
+    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
+    id: CodecTypes['pg/text@1']['output'];
+    key: CodecTypes['pg/text@1']['output'];
+    readonly [RelationKeys]?: never;
+  };
   export type public_Space = {
     createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
     fieldConfiguration: CodecTypes['pg/json@1']['output'];
@@ -598,6 +624,7 @@ export namespace Models {
 
 export declare const models: {
   public: {
+    RateLimitHit: Models.public_RateLimitHit;
     Space: Models.public_Space;
     Subscription: Models.public_Subscription;
     Testimonial: Models.public_Testimonial;
@@ -625,6 +652,39 @@ type ContractBase = Omit<
         readonly kind: 'postgres-schema';
         readonly entries: {
           readonly table: {
+            readonly RateLimitHit: {
+              columns: {
+                readonly createdAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly key: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'RateLimitHit_key_createdAt_idx_82c8d55f';
+                  readonly prefix: 'RateLimitHit_key_createdAt_idx';
+                  readonly columns: readonly ['key', 'createdAt'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [];
+            };
             readonly Space: {
               columns: {
                 readonly createdAt: {
@@ -1123,6 +1183,10 @@ type ContractBase = Omit<
   readonly target: 'postgres';
   readonly targetFamily: 'sql';
   readonly roots: {
+    readonly RateLimitHit: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'RateLimitHit';
+    };
     readonly Space: { readonly namespace: 'public' & NamespaceId; readonly model: 'Space' };
     readonly Subscription: {
       readonly namespace: 'public' & NamespaceId;
@@ -1146,6 +1210,35 @@ type ContractBase = Omit<
     readonly namespaces: {
       readonly public: {
         readonly models: {
+          readonly RateLimitHit: {
+            readonly fields: {
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly key: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+            };
+            readonly relations: Record<string, never>;
+            readonly storage: {
+              readonly table: 'RateLimitHit';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly id: { readonly column: 'id' };
+                readonly key: { readonly column: 'key' };
+              };
+            };
+          };
           readonly Space: {
             readonly fields: {
               readonly createdAt: {
@@ -1650,6 +1743,22 @@ type ContractBase = Omit<
     readonly executionHash: ExecutionHash;
     readonly mutations: {
       readonly defaults: readonly [
+        {
+          readonly onCreate: { readonly id: 'instantNow'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'RateLimitHit';
+            readonly field: 'createdAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: { readonly id: 'uuidv4'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'RateLimitHit';
+            readonly field: 'id';
+            readonly namespace: 'public';
+          };
+        },
         {
           readonly onCreate: { readonly id: 'instantNow'; readonly kind: 'generator' };
           readonly ref: {

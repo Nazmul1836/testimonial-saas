@@ -2,11 +2,30 @@ import { NextResponse } from 'next/server';
 import { db } from '@/prisma/db';
 import { getSession } from '@/lib/auth';
 import { successResponse, errorResponse, handleApiError } from '@/lib/api-response';
+import { rateLimit, clientKey } from '@/lib/rate-limit';
+import { validateSubmission, type FieldConfiguration } from '@/lib/testimonial-validation';
+
+// Public submissions per visitor (by IP), across all spaces
+const SUBMIT_LIMIT = 5;
+const SUBMIT_WINDOW_MS = 10 * 60 * 1000;
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const limited = await rateLimit(clientKey(req, 'submit-testimonial'), SUBMIT_LIMIT, SUBMIT_WINDOW_MS);
+    if (!limited.allowed) {
+      const res = errorResponse('Too many submissions. Please try again later.', 429);
+      res.headers.set('Retry-After', String(limited.retryAfterSeconds));
+      return res;
+    }
+
     const { id } = await params;
-    const body = await req.json();
+
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return errorResponse('Invalid JSON body', 400);
+    }
 
     const space = await db.orm.public.Space.where({ id }).first();
     if (!space) {
@@ -25,42 +44,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return errorResponse('This space is not accepting new testimonials right now.', 403);
     }
 
-    const {
-      customerName,
-      email,
-      companyName,
-      jobTitle,
-      socialProfileUrl,
-      profilePhotoUrl,
-      testimonialText,
-      rating,
-      sharingConsent
-    } = body;
-
-    // Validate required fields based on space.fieldConfiguration
-    const config = space.fieldConfiguration as any;
-    
-    if (!testimonialText) return errorResponse('Testimonial text is required', 400);
-    
-    if (config.customerName?.enabled && config.customerName?.required && !customerName) {
-      return errorResponse('Name is required', 400);
-    }
-    if (config.email?.enabled && config.email?.required && !email) {
-      return errorResponse('Email is required', 400);
+    // Validate against the fields this space's owner configured
+    const result = validateSubmission(body, (space.fieldConfiguration ?? {}) as FieldConfiguration);
+    if (!result.ok) {
+      return errorResponse(result.error, 400);
     }
 
     const newTestimonial = await db.orm.public.Testimonial.create({
       spaceId: space.id,
-      customerName: customerName || 'Anonymous',
-      email: email || 'no-email@example.com',
-      companyName: companyName || null,
-      jobTitle: jobTitle || null,
-      socialProfileUrl: socialProfileUrl || null,
-      profilePhotoUrl: profilePhotoUrl || null,
-      testimonialText,
-      rating: rating || null,
-      // Only an explicit true counts as consent (e.g. the string "false" must not)
-      sharingConsent: sharingConsent === true,
+      ...result.data,
     });
 
     return successResponse(newTestimonial, 201);

@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'fallback_secret_please_change_in_production'
-);
+import { getJwtSecret } from '@/lib/jwt-secret';
 
 const protectedRoutes = ['/dashboard', '/api/user'];
 const publicOnlyRoutes = ['/login', '/register'];
@@ -21,7 +18,7 @@ export async function middleware(request: NextRequest) {
 
   if (token) {
     try {
-      await jwtVerify(token, JWT_SECRET);
+      await jwtVerify(token, getJwtSecret());
       isAuthenticated = true;
     } catch (error) {
       // Token is invalid or expired

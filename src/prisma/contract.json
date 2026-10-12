@@ -4,6 +4,10 @@
   "target": "postgres",
   "profileHash": "3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2",
   "roots": {
+    "RateLimitHit": {
+      "model": "RateLimitHit",
+      "namespace": "public"
+    },
     "Space": {
       "model": "Space",
       "namespace": "public"
@@ -33,6 +37,47 @@
     "namespaces": {
       "public": {
         "models": {
+          "RateLimitHit": {
+            "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "key": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "key": {
+                  "column": "key"
+                }
+              },
+              "namespaceId": "public",
+              "table": "RateLimitHit"
+            }
+          },
           "Space": {
             "fields": {
               "createdAt": {
@@ -779,6 +824,43 @@
       "public": {
         "entries": {
           "table": {
+            "RateLimitHit": {
+              "columns": {
+                "createdAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "dataType": "pg/timestamptz",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "key": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "key",
+                    "createdAt"
+                  ],
+                  "name": "RateLimitHit_key_createdAt_idx_82c8d55f",
+                  "prefix": "RateLimitHit_key_createdAt_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
+            },
             "Space": {
               "columns": {
                 "createdAt": {
@@ -1321,12 +1403,34 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "5f4d2a05229f43633d7bf63337058f1c7cf81afbd589d52f1839fcf1be0882fc"
+    "storageHash": "8727b8ad20f263595f92caea19596b879dd73ff279cbb7e30b69e9927957c52e"
   },
   "execution": {
-    "executionHash": "fbebe05170e019895611aa4df77d94cae126e8b329d8d4f71c4a09e527598c78",
+    "executionHash": "20b02744ae5aad1f748df8876fbb74e6e25c69f309537cacb09a2e3136257745",
     "mutations": {
       "defaults": [
+        {
+          "onCreate": {
+            "id": "instantNow",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "RateLimitHit",
+            "field": "createdAt",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "uuidv4",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "RateLimitHit",
+            "field": "id",
+            "namespace": "public"
+          }
+        },
         {
           "onCreate": {
             "id": "instantNow",
