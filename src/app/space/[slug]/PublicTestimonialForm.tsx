@@ -189,7 +189,6 @@ export default function PublicTestimonialForm({ spaceId, theme, fieldConfigurati
           <input
             id="consent"
             type="checkbox"
-            required
             checked={sharingConsent}
             onChange={(e) => setSharingConsent(e.target.checked)}
             className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
@@ -197,6 +196,7 @@ export default function PublicTestimonialForm({ spaceId, theme, fieldConfigurati
         </div>
         <label htmlFor="consent" className="text-sm opacity-80 cursor-pointer select-none">
           I give permission to use this testimonial across social channels and other marketing campaigns.
+          <span className="block text-xs opacity-75 mt-1">Optional. Leave unchecked to share your feedback privately.</span>
         </label>
       </div>
 

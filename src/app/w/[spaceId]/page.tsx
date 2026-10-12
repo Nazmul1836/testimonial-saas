@@ -16,10 +16,11 @@ export default async function WidgetPage({ params }: { params: Promise<{ spaceId
   // Find config
   const config = await db.orm.public.WidgetConfiguration.where({ spaceId }).first();
   
-  // Find featured/visible testimonials
+  // Only publicly eligible testimonials: visible, not deleted, and shared with consent
   const testimonials = await db.orm.public.Testimonial.where({ spaceId })
     .where((t) => t.hidden.eq(false))
     .where((t) => t.deletedAt.isNull())
+    .where((t) => t.sharingConsent.eq(true))
     .orderBy((t) => t.createdAt.desc()) // Newest first
     .all();
 

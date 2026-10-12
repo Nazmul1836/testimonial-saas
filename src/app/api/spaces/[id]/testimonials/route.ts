@@ -17,15 +17,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const plan = subscription?.plan || 'free';
     const limit = plan === 'pro' ? 1000 : 100;
 
-    // Count ALL testimonials across ALL spaces owned by the user
-    const userSpaces = await db.orm.public.Space.select('id').where({ ownerId: space.ownerId }).all();
-    const spaceIds = userSpaces.map(s => s.id);
-    
-    if (spaceIds.length > 0) {
-      const currentCountResult = await db.orm.public.Testimonial.where((t) => t.spaceId.in(spaceIds)).aggregate((a) => ({ count: a.count() }));
-      if (currentCountResult.count >= limit) {
-        return errorResponse(`You have reached your account testimonial limit (${limit}). Please upgrade.`, 403);
-      }
+    // The limit applies per space; deleted testimonials free up room
+    const currentCountResult = await db.orm.public.Testimonial.where({ spaceId: space.id })
+      .where((t) => t.deletedAt.isNull())
+      .aggregate((a) => ({ count: a.count() }));
+    if (currentCountResult.count >= limit) {
+      return errorResponse('This space is not accepting new testimonials right now.', 403);
     }
 
     const {
@@ -62,7 +59,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       profilePhotoUrl: profilePhotoUrl || null,
       testimonialText,
       rating: rating || null,
-      sharingConsent: Boolean(sharingConsent),
+      // Only an explicit true counts as consent (e.g. the string "false" must not)
+      sharingConsent: sharingConsent === true,
     });
 
     return successResponse(newTestimonial, 201);

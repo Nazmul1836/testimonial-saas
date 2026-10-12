@@ -141,7 +141,11 @@ export default function InboxClient({ spaceId, initialData, initialMeta }: { spa
                 <div className="text-sm text-gray-500 dark:text-gray-400 flex flex-wrap gap-x-4 gap-y-2">
                   {t.email && <span>{t.email}</span>}
                   {t.jobTitle && t.companyName && <span>{t.jobTitle} at {t.companyName}</span>}
-                  {t.sharingConsent && <span className="text-green-600 dark:text-green-500 font-medium bg-green-50 dark:bg-green-900/30 px-2 py-0.5 rounded">Consent Given</span>}
+                  {t.sharingConsent ? (
+                    <span className="text-green-600 dark:text-green-500 font-medium bg-green-50 dark:bg-green-900/30 px-2 py-0.5 rounded">Consent Given</span>
+                  ) : (
+                    <span className="text-gray-600 dark:text-gray-400 font-medium bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">Private — not shown in widget</span>
+                  )}
                 </div>
               </div>
               
