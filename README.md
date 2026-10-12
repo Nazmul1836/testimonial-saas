@@ -105,15 +105,15 @@ Status is measured against the PRD's functional requirements (FR-01 – FR-11).
 
 | Area | Status | Notes |
 |------|:------:|-------|
-| **FR-01 Authentication** | ✅ | Register, login, logout; bcrypt-hashed passwords; JWT cookie; middleware protects `/dashboard`; ownership checks on all private API routes. |
+| **FR-01 Authentication** | ✅ | Register (signs the user in), login, logout; case-insensitive emails; bcrypt-hashed passwords; JWT cookie; middleware protects `/dashboard`; ownership checks on all private API routes. |
 | **FR-02 Dashboard** | ✅ | Totals for spaces / testimonials / featured, recent activity, daily chart with 7/30/90-day ranges, Free-plan upgrade banner. |
 | **FR-03 Space management** | ✅ | Create, view, edit, delete; unique slug with collision handling; space limit (3 Free / 25 Pro) enforced on the server. |
 | **FR-04 Form configuration** | 🟡 | Fields can be enabled/disabled and marked required; rating toggle works. **Only 7 themes** exist (`default`, `dark`, `light`, `glass`, `neon`, `brutal`, `corporate`) — the PRD asks for 25. |
-| **FR-05 Public submission** | 🟡 | `/space/[slug]` form with enabled fields, star rating, photo upload, and a consent checkbox. Server only validates name, email, and text — optional fields marked required are not checked server-side. No rate limiting on the public endpoint. |
+| **FR-05 Public submission** | 🟡 | `/space/[slug]` form with enabled fields, star rating, photo upload, and an optional consent checkbox. Server only validates name, email, and text — optional fields marked required are not checked server-side. No rate limiting on the public endpoint. |
 | **FR-06 Testimonial inbox** | 🟡 | List, text/name/email search, filters (all / favorite / featured / hidden), feature, favorite, hide, soft delete with confirmation, pagination. **Missing:** filters by space, rating, and date; overflow menu. |
-| **FR-07 Public display** | 🟡 | Hidden and deleted testimonials are excluded; featured shown first; emails never shown. **Sharing consent is not respected** — testimonials without consent still appear in the widget. The public Space page shows only the form, not testimonials. |
+| **FR-07 Public display** | 🟡 | Widget shows only testimonials with sharing consent; hidden and deleted are excluded; featured shown first; emails never shown. The inbox marks private (no-consent) testimonials. **Missing:** the public Space page shows only the form, not testimonials. |
 | **FR-08 Widget builder** | ✅ | Masonry, Carousel, and Grid layouts; light/dark mode; background color; live preview (refreshes after save); embed code via `public/widget.js` with a copy button. The `animation` field exists in the DB but has no UI or effect yet. |
-| **FR-09 Plan limits** | 🟡 | Space limits enforced. The testimonial limit (100 / 1,000) is counted **per account** instead of **per space** as the PRD specifies. |
+| **FR-09 Plan limits** | ✅ | Enforced on the server: 3 / 25 spaces per account and 100 / 1,000 testimonials per space (Free / Pro). Deleted testimonials don't count toward the limit. |
 | **FR-10 Billing & Stripe** | ✅ | Stripe Checkout upgrade; after redirect, `/api/stripe/confirm` verifies the session with Stripe's API before activating Pro. Verified webhook (`/api/webhooks/stripe`) syncs `checkout.session.completed` and `customer.subscription.*` (active, past_due, canceled). Billing card shows real plan, status, and renewal date; Pro users manage/cancel via the Stripe Customer Portal. |
 | **FR-11 Security** | 🟡 | Auth + ownership checks, server-side limits, hashed passwords, secrets in env vars, webhook signature verification and duplicate-event handling via `WebhookEvent`. **Missing:** schema-based input validation, rate limiting. `JWT_SECRET` falls back to a hard-coded default if unset. |
 | **Account settings** | ✅ | Change name and password (current password required). |
@@ -122,11 +122,10 @@ Status is measured against the PRD's functional requirements (FR-01 – FR-11).
 
 ### Suggested next steps
 
-1. Filter public widgets by `sharingConsent`.
-2. Make the testimonial limit per-space and validate all configured required fields on the server.
-3. Add rate limiting to `POST /api/spaces/[id]/testimonials`.
-4. Add Playwright tests for the acceptance criteria.
-5. Expand themes to 25 and add the inbox filters and widget animations.
+1. Validate all configured required fields on the server and add rate limiting to `POST /api/spaces/[id]/testimonials`.
+2. Add Playwright tests for the acceptance criteria.
+3. Add the inbox filters (space, rating, date) and overflow menu.
+4. Expand themes to 25 and add widget animations.
 
 ## Agentic tools used
 

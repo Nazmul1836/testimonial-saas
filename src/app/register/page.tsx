@@ -32,8 +32,9 @@ export default function RegisterPage() {
         throw new Error(data.error || 'Something went wrong');
       }
 
-      // Automatically redirect to login page after successful registration
-      router.push('/login?registered=true');
+      // Registration signs the user in, so go straight to the dashboard
+      router.push('/dashboard');
+      router.refresh();
     } catch (err: any) {
       setError(err.message);
     } finally {

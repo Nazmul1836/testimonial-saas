@@ -12,8 +12,8 @@ export async function POST(req: Request) {
       return errorResponse('Missing email or password', 400);
     }
 
-    // Find the user
-    const user = await db.orm.public.User.first({ email });
+    // Find the user (emails are stored in lowercase)
+    const user = await db.orm.public.User.first({ email: String(email).trim().toLowerCase() });
     
     if (!user) {
       return errorResponse('Invalid email or password', 401);
